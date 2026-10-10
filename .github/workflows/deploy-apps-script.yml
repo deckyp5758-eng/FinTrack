@@ -1,0 +1,51 @@
+name: Deploy Google Apps Script
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps-script/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-clasp:
+    name: Push code to Apps Script via Clasp
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Google Clasp
+        run: npm install -g @google/clasp
+
+      - name: Configure Clasp Authentication from GitHub Secrets
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ] || [ -z "$SCRIPT_ID" ]; then
+            echo "::error::GitHub Secrets CLASPRC_JSON dan SCRIPT_ID belum dikonfigurasi. Silakan tambahkan di Settings -> Secrets."
+            exit 1
+          fi
+          # Tulis token clasp secara aman di direktori home runner
+          echo "$CLASPRC_JSON" > ~/.clasprc.json
+          
+          # Buat file konfigurasi .clasp.json untuk folder apps-script
+          cat <<EOF > apps-script/.clasp.json
+          {
+            "scriptId": "$SCRIPT_ID",
+            "rootDir": "./"
+          }
+          EOF
+
+      - name: Push to Google Apps Script
+        working-directory: apps-script
+        run: |
+          clasp push --force
+          echo "Source code Apps Script berhasil dideploy!"

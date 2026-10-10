@@ -1,0 +1,6 @@
+{
+  "name": "FinTrack AI",
+  "description": "Personal Finance Manager dengan integrasi Google Apps Script & Sheets untuk mengelola saldo, transaksi, anggaran, dan target tabungan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
